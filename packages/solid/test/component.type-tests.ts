@@ -1,4 +1,4 @@
-import { mergeProps, splitProps } from "../src";
+import { mergeProps, defaultProps, splitProps } from "../src";
 
 type Assert<T extends true> = never;
 // from: https://github.com/Microsoft/TypeScript/issues/27024#issuecomment-421529650
@@ -181,6 +181,57 @@ function M4<T extends keyof M4Type = "a">(
   type M9 = typeof m9;
   type TestM9 = Assert<IsExact<M9, { a?: number; b?: number; c?: number }>>;
 }
+
+// d1: defaultProps preserves prop types
+type D1Props = {
+  a?: string;
+  b: string;
+  c?: string | undefined;
+  d?: "one" | "two" | "three";
+  e: "one" | "two" | "three";
+  f?: [1, 2, 3];
+  g: [1, 2, 3];
+  h?: [string, number, "one" | "two", 3 | 4];
+  i: [string, number, "one" | "two", 3 | 4];
+  j?: null;
+  k: null;
+};
+const d1 = defaultProps({} as D1Props, {});
+type D1 = typeof d1;
+type TestD1 = Assert<IsExact<D1, D1Props>>;
+
+// d2: defaultProps removes undefined on merged props
+const d2 = defaultProps(
+  {} as {
+    a?: string;
+    b?: "one" | "two" | "three";
+    c: string | undefined;
+    d?: [1, 2, 3];
+    e?: [string, number, "one" | "two", 3 | 4];
+    f?: null;
+  },
+  {
+    a: "hello",
+    b: "two",
+    c: undefined,
+    d: [1, 2, 3],
+    e: ["string", 99, "one", 4],
+    f: null
+  }
+);
+type D2 = typeof d2;
+type TestD2 = Assert<
+  IsExact<
+    D2,
+    {
+      a: string;
+      b: "one" | "two" | "three";
+      c: [1, 2, 3];
+      d: [string, number, "one" | "two", 3 | 4];
+      e: null;
+    }
+  >
+>;
 
 // s1-s3: splitProps return type is correct regardless of usage
 const s1 = splitProps({ a: 1, b: 2 }, ["a"]);

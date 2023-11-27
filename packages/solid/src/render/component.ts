@@ -265,6 +265,20 @@ export function mergeProps<T extends unknown[]>(...sources: T): MergeProps<T> {
   return target as any;
 }
 
+export type OnlyDeclaredProps<P, D extends Partial<P>> = {
+  -readonly [K in keyof D]-?: D[K] | Exclude<P[K extends keyof P ? K : never], undefined>;
+};
+
+export type DefaultProps<P, D extends Partial<P>> = Simplify<{
+  [K in keyof (P & OnlyDeclaredProps<P, D>)]: K extends keyof D
+    ? OnlyDeclaredProps<P, D>[K]
+    : P[K extends keyof P ? K : never];
+}>;
+
+export function defaultProps<P, D extends Partial<P>>(props: P, defaults: D) {
+  return mergeProps(defaults, props) as DefaultProps<P, D>;
+}
+
 export type SplitProps<T, K extends (readonly (keyof T)[])[]> = [
   ...{
     [P in keyof K]: P extends `${number}`

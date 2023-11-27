@@ -2,6 +2,7 @@ import {
   createRoot,
   createComponent,
   mergeProps,
+  defaultProps,
   splitProps,
   createUniqueId,
   createSignal,
